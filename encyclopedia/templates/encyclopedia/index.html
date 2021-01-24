@@ -1,0 +1,20 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    Encyclopedia
+{% endblock %}
+
+{% block body %}
+    <h1>All Pages</h1>
+
+    <ul>
+        {% for entry in entries %}
+            <!-- See https://docs.djangoproject.com/en/3.1/ref/templates/
+            builtins/ and go to the url section for explanation -->
+            <li><a href="{% url 'entry' entry%}">{{ entry }}</a></li>
+        {% empty %}
+            <li>Error - your search input does not match any of our entries</li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}

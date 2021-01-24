@@ -1,0 +1,19 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    Edit {{ title }}
+{% endblock %}
+
+{% block body%}
+{% autoescape off %}
+<h1>{{ inner_title }}</h1>
+{% endautoescape %}
+<form action="{% url 'edit' title %}" method="POST">
+    {% csrf_token %}
+    {% load widget_tweaks %}
+    {% render_field edit_form.text value=entry %}
+    <br>
+    <input type="submit" value="Edit entry">
+    <br>
+</form>
+{% endblock %}
