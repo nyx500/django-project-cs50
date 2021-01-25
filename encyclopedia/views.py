@@ -16,6 +16,7 @@ class NewSearchForm(forms.Form):
     search_entry = forms.CharField(label="", widget=forms.TextInput
                            (attrs={'placeholder':'Search Encyclopedia'}))
 
+# Widgets allow for form to include HTML tag textarea and
 class NewEntry(forms.Form):
     title = forms.CharField(label="Enter title of new page", label_suffix="",
                     widget=forms.TextInput
@@ -27,26 +28,38 @@ class EditEntry(forms.Form):
 
 def index(request):
     if request.method == "POST":
+        # Populates a new NewSearchForm with data from form in HTML
         form = NewSearchForm(request.POST)
+        # Must check validity of form
         if form.is_valid():
+            # .cleaned_data[] method returns an element from the form class
             search_entry = form.cleaned_data["search_entry"].lower()
             list_of_entries = util.list_entries()
             for i in range(len(list_of_entries)):
                 list_of_entries[i] = list_of_entries[i].lower()
             if search_entry in list_of_entries:
+                # .markdown converts markdown in the selected entry into HTML
                 search_entry = markdown.markdown(util.get_entry(search_entry))
+                # BeautifulSoup module finds the h1 or title in the markdown-to-HTML text
                 soup = BeautifulSoup(search_entry, 'html.parser').find('h1').text
                 return render(request, "encyclopedia/entry.html", {
+                    # Returns "Search" form to the layout.html page every time
                     "form": NewSearchForm(),
                     "title": soup, "entry": search_entry, "random_entries": util.list_entries()
                 })
             else:
+                # Escapes all special regex characters someone searched for,
+                # treating them as normal characters
                 search_entry = re.escape(search_entry)
+                # Creates a regular expression for the search entry ignoring case
                 search_entry = re.compile("%s" % search_entry, re.IGNORECASE)
                 matches = []
+                # Checks if the query is a substring of existing entries
                 for entry in list_of_entries:
                     if re.search(search_entry, entry):
+                        # Appends entry including that substring to matches
                         matches.append(entry)
+                # New non-lowercase list of entries defined
                 list_entries = util.list_entries()
                 for i in range(len(matches)):
                     for j in range(len(list_entries)):
@@ -70,8 +83,10 @@ def edit(request, title):
         form = EditEntry(request.POST)
         if form.is_valid():
             entry = form.cleaned_data["text"]
+            # Uses string concatenation to convert title into Markdown
             entry = '#' + ' ' + title + "\n\n" + entry
             util.save_entry(title, entry)
+            # Converts Markdown into HTML
             entry = markdown.markdown(util.get_entry(title))
             return render(request, "encyclopedia/entry.html", {
                         "form": NewSearchForm(), "title": title,
@@ -84,19 +99,21 @@ def edit(request, title):
                 "inner_title": title,
                 "entry": entry, "random_entries": util.list_entries()
             })
-    else:    
+    else:
         entry = util.get_entry(title)
+        # Gets rest of entry excluding the title, the first line
         entry = entry.split('\n', 1)[1]
         return render(request, "encyclopedia/edit_entry.html", {
             "title": title,
             "inner_title": title,
             "entry": entry,
             "form": NewSearchForm(),
+            # Pre-populates the textarea with existing entry
             "edit_form": EditEntry(initial={'text': entry}),
             "random_entries": util.list_entries()
         })
 
-    
+
 
 def entry(request, entry):
     if util.get_entry(entry):
