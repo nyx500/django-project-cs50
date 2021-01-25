@@ -1,3 +1,3 @@
 # C++
 
-C++ is a general-purpose programming language with classes.
+C++ is a general-purpose programming language extending C and adding classes.

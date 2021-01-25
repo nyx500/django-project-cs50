@@ -6,10 +6,9 @@
 {% block body %}
     {% autoescape off %}
     {{ inner_title }}
-    <!-- autoescape in Django allows html tags to execute inside the curly braces -->
     {{ entry }}
     {% endautoescape %}
-
-    <a href="{% url 'edit' title %}">Edit</a>
-
+    {% if inner_title != "<h1>Error</h1>" %}
+        <a href="{% url 'edit' title %}">Edit</a>
+    {% endif %}
 {% endblock %}

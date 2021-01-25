@@ -5,12 +5,17 @@
 {% endblock %}
 
 {% block body%}
+<!-- Autoescape off Django command allows HTML to be interpreted from context variable -->
 {% autoescape off %}
 <h1>{{ inner_title }}</h1>
 {% endautoescape %}
 <form action="{% url 'edit' title %}" method="POST">
     {% csrf_token %}
+    <!--Widget tweaks: really useful Django feature that enables you to manipulate
+    HTML attributes of forms received from Django forms-->
     {% load widget_tweaks %}
+    <!-- Pre-populates entry edit form with existing input for that entry.
+    Remember to put render_field command when using Widget tweaks -->
     {% render_field edit_form.text value=entry %}
     <br>
     <input type="submit" value="Edit entry">

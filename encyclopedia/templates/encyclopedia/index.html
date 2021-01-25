@@ -12,6 +12,8 @@
             <!-- See https://docs.djangoproject.com/en/3.1/ref/templates/
             builtins/ and go to the url section for explanation -->
             <li><a href="{% url 'entry' entry%}">{{ entry }}</a></li>
+            <!-- If variable inserted from python function is empty, then
+            this -->
         {% empty %}
             <li>Error - your search input does not match any of our entries</li>
         {% endfor %}

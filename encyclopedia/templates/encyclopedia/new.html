@@ -9,6 +9,7 @@
     <br>
     <form action="{% url 'new' %}" method="POST">
         {% csrf_token %}
+        <!-- Remember! Useful ways of getting sub-parts of a Django form -->
         {{ form2.title.label_tag }}
         <br>
         {{ form2.title }}

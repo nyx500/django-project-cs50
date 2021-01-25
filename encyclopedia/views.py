@@ -38,7 +38,7 @@ def index(request):
                 soup = BeautifulSoup(search_entry, 'html.parser').find('h1').text
                 return render(request, "encyclopedia/entry.html", {
                     "form": NewSearchForm(),
-                    "title": soup, "entry": search_entry
+                    "title": soup, "entry": search_entry, "random_entries": util.list_entries()
                 })
             else:
                 search_entry = re.escape(search_entry)
@@ -54,14 +54,15 @@ def index(request):
                             matches[i] = list_entries[j]
                 return render(request, "encyclopedia/index.html", {
                         "entries": matches, "form": NewSearchForm(),
-                        "search_entry": search_entry
+                        "search_entry": search_entry,"random_entries": util.list_entries()
                     })
         else:
             return render(request, "encyclopedia/index.html", {
-                "form": form
+                "form": form, "random_entries": util.list_entries()
             })
     return render(request, "encyclopedia/index.html", {
-        "entries": sorted(util.list_entries()), "form": NewSearchForm()
+        "entries": sorted(util.list_entries()), "form": NewSearchForm(),
+        "random_entries": util.list_entries()
     })
 
 def edit(request, title):
@@ -74,14 +75,14 @@ def edit(request, title):
             entry = markdown.markdown(util.get_entry(title))
             return render(request, "encyclopedia/entry.html", {
                         "form": NewSearchForm(), "title": title,
-                        "entry": entry
+                        "entry": entry, "random_entries": util.list_entries()
                     })
         else:
             return render(request, "encyclopedia/edit_entry.html", {
                 "form": NewSearchForm(), "edit_form": EditEntry(),
                 "title": title,
                 "inner_title": title,
-                "entry": entry,
+                "entry": entry, "random_entries": util.list_entries()
             })
     else:    
         entry = util.get_entry(title)
@@ -91,7 +92,8 @@ def edit(request, title):
             "inner_title": title,
             "entry": entry,
             "form": NewSearchForm(),
-            "edit_form": EditEntry(initial={'text': entry})
+            "edit_form": EditEntry(initial={'text': entry}),
+            "random_entries": util.list_entries()
         })
 
     
@@ -104,17 +106,21 @@ def entry(request, entry):
         if BeautifulSoup(html_entry, 'html.parser').find('h1'):
             soup = BeautifulSoup(html_entry, 'html.parser').find('h1').text
             return render(request, "encyclopedia/entry.html", {
-                "form": NewSearchForm(), "title": soup, "entry": html_entry
+                "form": NewSearchForm(), "title": soup, "entry": html_entry,
+                "random_entries": util.list_entries()
             })
         else:
             return render(request, "encyclopedia/entry.html", {
-                "form": NewSearchForm(), "title": entry, "inner_title": entry, "entry": html_entry
+                "form": NewSearchForm(), "title": entry, "inner_title": entry, "entry": html_entry,
+                "random_entries": util.list_entries()
             })
     else:
         return render(request, "encyclopedia/entry.html", {
             "form": NewSearchForm(),
             "title": "Error",
-            "entry": "Error: Your requested page has not been found"
+            "inner_title": "<h1>Error</h1>",
+            "entry": "Error: Your requested page has not been found",
+            "random_entries": util.list_entries()
         })
 
 def new(request):
@@ -123,26 +129,32 @@ def new(request):
         if form.is_valid():
             title = form.cleaned_data["title"]
             existing_entries = util.list_entries()
-            for entry in existing_entries:
-                if title.lower() == entry.lower():
-                    return render(request, "encyclopedia/entry.html",{
-                        "form": NewSearchForm(),
-                        "title": "Error", "entry": "Error: This encyclopedia entry already exists"
-                    })
-                else:
-                    entry = form.cleaned_data["text"]
-                    entry = '#' + ' ' + title + "\n\n" + entry
-                    util.save_entry(form.cleaned_data["title"], entry)
-                    entry = markdown.markdown(util.get_entry(title))
-                    return render(request, "encyclopedia/entry.html", {
-                        "form": NewSearchForm(), "title": title,
-                        "entry": entry
-                    })
+            for i in range(len(existing_entries)):
+                existing_entries[i] = existing_entries[i].lower()
+            if title.lower() in existing_entries:
+                return render(request, "encyclopedia/entry.html",{
+                              "form": NewSearchForm(),
+                              "title": "Error", "inner_title": "<h1>Error</h1>",
+                              "entry": "This encyclopedia entry already exists.",
+                              "random_entries": util.list_entries()
+                            })
+            else:
+                entry = form.cleaned_data["text"]
+                entry = '#' + ' ' + title + "\n\n" + entry
+                util.save_entry(form.cleaned_data["title"], entry)
+                entry = markdown.markdown(util.get_entry(title))
+                return render(request, "encyclopedia/entry.html", {
+                    "form": NewSearchForm(), "title": title,
+                    "entry": entry,
+                    "random_entries": util.list_entries()
+                })
         else:
             return render(request, "encyclopedia/new.html", {
-                "form": NewSearchForm(), "form2": NewEntry()
+                "form": NewSearchForm(), "form2": NewEntry(),
+                "random_entries": util.list_entries()
             })
     else:
         return render(request, "encyclopedia/new.html", {
-            "form": NewSearchForm(), "form2": NewEntry()
+            "form": NewSearchForm(), "form2": NewEntry(),
+            "random_entries": util.list_entries()
         })
