@@ -4,7 +4,6 @@ from . import util
 import markdown
 from bs4 import BeautifulSoup
 import re
-from django.utils.safestring import mark_safe
 
 # My personal form is called 'NewSearchForm'. This is the child form of a
 # general Django which exists in the django forms module
